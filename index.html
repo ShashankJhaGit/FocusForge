@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Forge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Logo Styles */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .help-btn {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .help-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .logo {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin-right: 15px;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 40px;
+            height: 25px;
+            background: transparent;
+            border: 4px solid #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 20px;
+            width: 20px;
+            height: 3px;
+            background: #fff;
+            border-radius: 2px;
+            box-shadow: 
+                0 6px 0 #fff,
+                0 12px 0 #fff;
+        }
+
+        .logo-flame {
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 20px solid #ff6b6b;
+            border-radius: 50%;
+            animation: flicker 2s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+            100% { transform: scale(1.1) rotate(2deg); opacity: 1; }
+        }
+
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            letter-spacing: -1px;
+        }
+
+        /* Main Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        /* Probability Display */
+        .probability-display {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .probability-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .probability-bar {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .probability-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Break Time Display */
+        .break-time-display {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .break-time-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #48bb78;
+            margin-bottom: 10px;
+        }
+
+        .break-time-label {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        /* Difficulty Selector */
+        .difficulty-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-btn {
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            background: #f7fafc;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .difficulty-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .difficulty-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Action Area */
+        .action-area {
+            grid-column: 1 / -1;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .correct-btn {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .incorrect-btn {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-btn.pressed {
+            transform: scale(0.95);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Break Time Controls */
+        .break-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .break-btn {
+            padding: 10px 20px;
+            background: #ed8936;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .break-btn:hover {
+            background: #dd6b20;
+            transform: translateY(-2px);
+        }
+
+        /* Notes Section */
+        .notes-section {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .notes-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .notes-toggle.expanded {
+            transform: rotate(90deg);
+        }
+
+        .notes-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .notes-content.expanded {
+            max-height: 300px;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .notes-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .notes-status {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #718096;
+            text-align: center;
+        }
+
+        /* Help Modal */
+        .help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .help-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .help-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .help-modal.show .help-content {
+            transform: scale(1);
+        }
+
+        .help-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 30px 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .help-header h2 {
+            color: #667eea;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #718096;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #f7fafc;
+            color: #4a5568;
+        }
+
+        .help-body {
+            padding: 20px 30px 30px;
+        }
+
+        .help-body h3 {
+            color: #4a5568;
+            margin: 20px 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .help-body h3:first-child {
+            margin-top: 0;
+        }
+
+        .help-body p {
+            color: #718096;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .help-body ul {
+            color: #718096;
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .help-body li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .help-body strong {
+            color: #4a5568;
+        }
+
+        /* Feedback Overlay */
+        .feedback-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .feedback-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .feedback-message {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .feedback-overlay.show .feedback-message {
+            transform: scale(1);
+        }
+
+        .feedback-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .feedback-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        /* Celebration Effect */
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            z-index: 1001;
+            animation: celebrate 1s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes celebrate {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 200px;
+            }
+            
+            .difficulty-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .logo-text {
+                font-size: 2rem;
+            }
+        }
+
+        /* Keyboard shortcut indicators */
+        .shortcut-hint {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Logo -->
+        <div class="logo-container">
+            <div class="logo">
+                <div class="logo-flame"></div>
+            </div>
+            <h1 class="logo-text">Focus Forge</h1>
+            <button class="help-btn" onclick="showHelp()">?</button>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div class="dashboard">
+            <!-- Probability Card -->
+            <div class="card">
+                <h2>Current Probability Of Getting a Break</h2>
+                <div class="probability-display">
+                    <div class="probability-number" id="probabilityNumber">0%</div>
+                    <div class="probability-bar">
+                        <div class="probability-fill" id="probabilityFill" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-bottom: 15px; color: #4a5568;">Study Intensity Level</h3>
+                <div class="difficulty-selector">
+                    <button class="difficulty-btn active" data-difficulty="easy">Easy (+10%)</button>
+                    <button class="difficulty-btn" data-difficulty="medium">Medium (+7%)</button>
+                    <button class="difficulty-btn" data-difficulty="hard">Hard (+5%)</button>
+                    <button class="difficulty-btn" data-difficulty="extrahard">Extra Hard (+3%)</button>
+                </div>
+            </div>
+
+            <!-- Break Time Card -->
+            <div class="card">
+                <h2>Earned Break Time</h2>
+                <div class="break-time-display">
+                    <div class="break-time-number" id="breakTimeNumber">0</div>
+                    <div class="break-time-label">minutes earned</div>
+                </div>
+                
+                <div class="break-controls">
+                    <button class="break-btn" onclick="useBreakTime(5)">Use 5 min</button>
+                    <button class="break-btn" onclick="useBreakTime(10)">Use 10 min</button>
+                    <button class="break-btn" onclick="showCustomBreakTime()">Custom</button>
+                </div>
+            </div>
+
+            <!-- Action Area -->
+            <div class="card action-area">
+                <h2>Mark Your Answer</h2>
+                <p style="color: #718096; margin-bottom: 20px;">Answer your question, then mark it as correct or incorrect</p>
+                
+                <div class="action-buttons">
+                    <button class="action-btn correct-btn" id="correctBtn" onclick="markAnswer(true)">
+                        ✓ Mark Correct
+                        <div class="shortcut-hint">Press Enter</div>
+                    </button>
+                    <button class="action-btn incorrect-btn" id="incorrectBtn" onclick="markAnswer(false)">
+                        ✗ Mark Incorrect
+                        <div class="shortcut-hint">Press Backspace</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div class="card notes-section">
+                <div class="notes-header" onclick="toggleNotes()">
+                    <h2>Study Notes</h2>
+                    <button class="notes-toggle" id="notesToggle">▶</button>
+                </div>
+                
+                <div class="notes-content" id="notesContent">
+                    <textarea 
+                        class="notes-textarea" 
+                        id="notesTextarea" 
+                        placeholder="Write your study notes here..."
+                    ></textarea>
+                    <div class="notes-status" id="notesStatus">Notes auto-saved</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="help-modal" id="helpModal">
+        <div class="help-content">
+            <div class="help-header">
+                <h2>Welcome to Focus Forge!</h2>
+                <button class="close-btn" onclick="hideHelp()">×</button>
+            </div>
+            <div class="help-body">
+                <h3>🎯 Goal</h3>
+                <p>Earn break time by answering study questions correctly! The more you get right, the closer you get to earning a well-deserved break.</p>
+                
+                <h3>🎮 How It Works</h3>
+                <ul>
+                    <li><strong>Study externally</strong> - Use your books, notes, or any study material</li>
+                    <li><strong>Test yourself</strong> - Create your own questions or use existing ones</li>
+                    <li><strong>Mark your answers</strong> - Click "Mark Correct" or "Mark Incorrect" based on how you did</li>
+                    <li><strong>Build probability</strong> - Each correct answer increases your chance of earning break time</li>
+                    <li><strong>Earn breaks</strong> - When you reach 100%, you earn 5 minutes of break time!</li>
+                </ul>
+                
+                <h3>⚙️ Features</h3>
+                <ul>
+                    <li><strong>Study Intensity</strong> - Choose how much work you want to do to earn breaks</li>
+                    <li><strong>Break Time Bank</strong> - Accumulate and use your earned break time</li>
+                    <li><strong>Study Notes</strong> - Keep track of important information</li>
+                    <li><strong>Keyboard Shortcuts</strong> - Press Enter for correct, Backspace for incorrect</li>
+                    <li><strong>Auto-Save</strong> - Your progress is always saved</li>
+                </ul>
+                
+                <h3>💡 Tips</h3>
+                <ul>
+                    <li>Start with "Easy" intensity if you're new to this study method</li>
+                    <li>Be honest with yourself when marking answers</li>
+                    <li>Use the notes section to track what you're learning</li>
+                    <li>Take your earned breaks - they're important for retention!</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="feedback-overlay" id="feedbackOverlay">
+        <div class="feedback-message">
+            <div class="feedback-icon" id="feedbackIcon">✓</div>
+            <div class="feedback-text" id="feedbackText">Correct! +10% Probability</div>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        let gameState = {
+            probability: 0,
+            breakTime: 0,
+            difficulty: 'easy',
+            notes: ''
+        };
+
+        // Difficulty settings
+        const difficultySettings = {
+            easy: 10,
+            medium: 7,
+            hard: 5,
+            extrahard: 3
+        };
+
+        // Initialize the application
+        function init() {
+            loadGameState();
+            updateDisplay();
+            setupEventListeners();
+            setupNotesAutoSave();
+        }
+
+        // Load game state from localStorage
+        function loadGameState() {
+            const savedState = localStorage.getItem('focusForgeState');
+            if (savedState) {
+                gameState = { ...gameState, ...JSON.parse(savedState) };
+            }
+            
+            // Update difficulty selector
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.difficulty === gameState.difficulty);
+            });
+            
+            // Load notes
+            document.getElementById('notesTextarea').value = gameState.notes;
+        }
+
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('focusForgeState', JSON.stringify(gameState));
+        }
+
+        // Update display elements
+        function updateDisplay() {
+            document.getElementById('probabilityNumber').textContent = gameState.probability + '%';
+            document.getElementById('probabilityFill').style.width = gameState.probability + '%';
+            document.getElementById('breakTimeNumber').textContent = gameState.breakTime;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Difficulty selector
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    gameState.difficulty = btn.dataset.difficulty;
+                    saveGameState();
+                });
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'TEXTAREA') return; // Don't trigger in notes
+                
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    markAnswer(true);
+                    animateButton('correctBtn');
+                } else if (e.key === 'Backspace') {
+                    e.preventDefault();
+                    markAnswer(false);
+                    animateButton('incorrectBtn');
+                } else if (e.key === 'Escape') {
+                    hideHelp();
+                }
+            });
+
+            // Close help modal when clicking outside
+            document.getElementById('helpModal').addEventListener('click', (e) => {
+                if (e.target.id === 'helpModal') {
+                    hideHelp();
+                }
+            });
+        }
+
+        // Animate button press
+        function animateButton(buttonId) {
+            const button = document.getElementById(buttonId);
+            button.classList.add('pressed');
+            setTimeout(() => button.classList.remove('pressed'), 150);
+        }
+
+        // Mark answer as correct or incorrect
+        function markAnswer(isCorrect) {
+            if (isCorrect) {
+                const increment = difficultySettings[gameState.difficulty];
+                gameState.probability += increment;
+                
+                if (gameState.probability >= 100) {
+                    gameState.probability = 100;
+                    setTimeout(() => {
+                        showCelebration();
+                        gameState.breakTime += 5; // Earn 5 minutes
+                        gameState.probability = 0;
+                        updateDisplay();
+                        saveGameState();
+                    }, 500);
+                }
+                
+                showFeedback(true, `Correct! +${increment}% Probability`);
+            } else {
+                gameState.probability = 0;
+                showFeedback(false, 'Incorrect. Probability Reset.');
+            }
+            
+            updateDisplay();
+            saveGameState();
+        }
+
+        // Show feedback overlay
+        function showFeedback(isCorrect, message) {
+            const overlay = document.getElementById('feedbackOverlay');
+            const icon = document.getElementById('feedbackIcon');
+            const text = document.getElementById('feedbackText');
+            
+            icon.textContent = isCorrect ? '✓' : '✗';
+            icon.style.color = isCorrect ? '#48bb78' : '#f56565';
+            text.textContent = message;
+            
+            overlay.classList.add('show');
+            setTimeout(() => overlay.classList.remove('show'), 1500);
+        }
+
+        // Show celebration effect
+        function showCelebration() {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.textContent = '🎉';
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => {
+                document.body.removeChild(celebration);
+            }, 1000);
+        }
+
+        // Use break time
+        function useBreakTime(minutes) {
+            if (gameState.breakTime >= minutes) {
+                gameState.breakTime -= minutes;
+                updateDisplay();
+                saveGameState();
+                showFeedback(true, `Enjoyed ${minutes} minutes of break time!`);
+            } else {
+                showFeedback(false, 'Not enough break time earned!');
+            }
+        }
+
+        // Show custom break time input
+        function showCustomBreakTime() {
+            const minutes = prompt('How many minutes would you like to use?');
+            if (minutes && !isNaN(minutes) && minutes > 0) {
+                useBreakTime(parseInt(minutes));
+            }
+        }
+
+        // Toggle notes section
+        function toggleNotes() {
+            const content = document.getElementById('notesContent');
+            const toggle = document.getElementById('notesToggle');
+            
+            content.classList.toggle('expanded');
+            toggle.classList.toggle('expanded');
+        }
+
+        // Setup notes auto-save
+        function setupNotesAutoSave() {
+            const textarea = document.getElementById('notesTextarea');
+            const status = document.getElementById('notesStatus');
+            let saveTimeout;
+            
+            textarea.addEventListener('input', () => {
+                status.textContent = 'Saving...';
+                clearTimeout(saveTimeout);
+                
+                saveTimeout = setTimeout(() => {
+                    gameState.notes = textarea.value;
+                    saveGameState();
+                    status.textContent = 'Notes auto-saved';
+                }, 1000);
+            });
+        }
+
+        // Show help modal
+        function showHelp() {
+            document.getElementById('helpModal').classList.add('show');
+        }
+
+        // Hide help modal
+        function hideHelp() {
+            document.getElementById('helpModal').classList.remove('show');
+        }
+
+        // Initialize the application when the page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
